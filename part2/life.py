@@ -6,6 +6,19 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
+def readFile(filename):
+    """
+        Reads the grids from a text file.
+        Saves them as 2D arrays
+    """
+    with open(filename) as f:
+        file = f.readlines()
+    board = []
+    nsteps = str(file[0])
+    for row in file[1:]:
+
+        board.append([int(x) for x in list(row.rstrip('\n'))])
+    return nsteps, board
 
 def animate(vals):
     fig, axes = plt.subplots()
@@ -17,14 +30,9 @@ def animate(vals):
     ani = FuncAnimation(fig, update_plot, frames=len(vals), interval=1000)
     plt.show()
 
-vals = [ [[0, 0, 1],
-          [0, 0, 1],
-          [0, 0, 1]],
-         [[0, 1, 0],
-          [0, 1, 0],
-          [0, 1, 0]],
-         [[1, 0, 0],
-          [1, 0, 0],
-          [1, 0, 0]] ]
+def step(board):
+    pass
 
+n, board = readFile("inLife.txt")
+vals = [board]
 animate(vals)
