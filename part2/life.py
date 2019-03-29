@@ -6,6 +6,8 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
+from copy import copy, deepcopy
+
 def readFile(filename):
     with open(filename) as f:
         file = f.readlines()
@@ -23,7 +25,7 @@ def animate(vals):
         axes.clear()
         im = axes.pcolormesh(vals[i], cmap="Greys", vmin=0, vmax=1)
         return axes
-    ani = FuncAnimation(fig, update_plot, frames=len(vals), interval=1000)
+    ani = FuncAnimation(fig, update_plot, frames=len(vals), interval=500)
     plt.show()
 
 def num_neighbours(x, y):
@@ -46,13 +48,24 @@ def num_neighbours(x, y):
             total += board[y+1][x+1]
     return total
 
-def step():
-    next = [[0 for i in range(len(board[0]))] for j in range(len(board))]
+def step(board):
+    next = deepcopy(board)
     for y in range(len(board)):
         for x in range(len(board[0])):
-            print(x, y, num_neighbours(x, y))
+            n = num_neighbours(x, y)
+            alive = board[y][x]
+            if alive and n < 2:
+                next[y][x] = 0 # Dies :(
+            elif alive and n > 3:
+                next[y][x] = 0 # Dies :(
+            elif alive and (n == 2 or n == 3):
+                pass # survives :)
+            elif not alive and n == 3:
+                next[y][x] = 1
+    return next
 
 n, board = readFile("inLife.txt")
-vals = [board, np.transpose(board)]
-step()
+next = step(board)
+#nnext = step(next)
+vals = [board, next]
 animate(vals)
