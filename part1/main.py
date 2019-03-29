@@ -39,7 +39,7 @@ def display(boids):
         boidShapes.append(canvas.create_oval(boid.position[0], boid.position[1],
                                              boid.position[0] + boidSize, boid.position[1] + boidSize, fill='red'))
 
-    gui.after(1000, lambda: gui.destroy())
+    gui.after(1000, gui.destroy)
     gui.mainloop()
 
 
