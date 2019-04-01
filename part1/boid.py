@@ -2,8 +2,9 @@ import math
 
 
 class Boid:
-    def __init__(self, id, velocity, position):
+    def __init__(self, id, velocity, position, boundary):
         self.id = id
+        self.boundary = boundary
         self.position = position  # x, y
         self.velocity = velocity  # x, y
 
@@ -14,17 +15,22 @@ class Boid:
         self.position[0] += self.velocity[0]
         self.position[1] += self.velocity[1]
 
+        self.position[0] %= self.boundary
+        self.position[1] %= self.boundary
+
     # moves boid to middle of center of mass
     def rule1(self, boids):
-        vector = [0, 0]
+        # a vector representing the center of mass for the boid's neighbourhood
+        centerOfMass = self.position[:]
         for boid in boids:
             if boid.id != self.id:
-                vector[0] = vector[0] + boid.position[0]
-                vector[1] = vector[1] + boid.position[1]
-        vector[0] /= len(boids)  # average x pos of other boids
-        vector[1] /= len(boids)  # average y pos of other boids
-        self.velocity[0] += (vector[0] - self.position[0]) / 100
-        self.velocity[1] += (vector[1] - self.position[1]) / 100
+                centerOfMass[0] = centerOfMass[0] + boid.position[0]
+                centerOfMass[1] = centerOfMass[1] + boid.position[1]
+        centerOfMass[0] /= len(boids)  # average x pos of other boids
+        centerOfMass[1] /= len(boids)  # average y pos of other boids
+        self.velocity[0] += (centerOfMass[0] -
+                             self.position[0]) / 100  # weighted 1/100
+        self.velocity[1] += (centerOfMass[1] - self.position[1]) / 100
 
     # Keep boids small distance apart
 
@@ -32,7 +38,6 @@ class Boid:
         vector = [0, 0]
         for boid in boids:
             if boid.id != self.id:
-
                 if self._inSameNeighborhood(boid):
                     # subtract x coordinates
                     vector[0] -= self.position[0]-boid.position[0]
@@ -40,22 +45,25 @@ class Boid:
                     vector[1] -= self.position[1]-boid.position[1]
         self.velocity[0] += vector[0]
         self.velocity[1] += vector[1]
+        print(vector, self.velocity)
+
     # Align boid velocities
 
     def rule3(self, boids):
-        vector = [0, 0]
+        flockVelocity = self.velocity[:]
         for boid in boids:
             if self.id != boid.id:
                 if self._inSameNeighborhood(boid):
-                    vector[0] = vector[0] + boid.velocity[0]
-                    vector[1] = vector[1] + boid.velocity[1]
-        vector[0] /= len(boids)
-        vector[1] /= len(boids)
-        self.velocity[0] += (vector[0] - self.position[0]) / 8
-        self.velocity[1] += (vector[1] - self.position[1]) / 8
+                    flockVelocity[0] += boid.velocity[0]
+                    flockVelocity[1] += boid.velocity[1]
+        flockVelocity[0] /= len(boids) - 1 or 1
+        flockVelocity[1] /= len(boids) - 1 or 1
+        self.velocity[0] += (flockVelocity[0] -
+                             self.position[0]) / 8  # weighted 1/8
+        self.velocity[1] += (flockVelocity[1] - self.position[1]) / 8
 
     def _inSameNeighborhood(self, boid):
-        return self._distance(boid) < 100
+        return self._distance(boid) < 30
 
     def _distance(self, boid):
         position = boid.position
