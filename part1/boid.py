@@ -2,17 +2,17 @@ import math
 
 
 class Boid:
-    def __init__(self, id, velocity, position, boundary, size,topSpeed=50):
+    def __init__(self, id, velocity, position, boundary, size, topSpeed=50):
         self.id = id
         self.boundary = boundary
         self.position = position  # x, y
         self.velocity = velocity  # x, y
         self.size = size
         self.topSpeed = topSpeed
-
+        self.neighbourhoodSize = self.boundary/37
 
     def update_position(self, boids, windSpeed):
-        self.neighbourhood = self.getNeighbors(boids, self.boundary/13)
+        self.neighbourhood = self.getNeighbors(boids, self.neighbourhoodSize)
 
         self.rule1(boids)
         self.rule2()
@@ -59,8 +59,8 @@ class Boid:
         # average y pos of other boids
         centerOfMass[1] /= len(boids) - 1 or 1
         self.velocity[0] += (centerOfMass[0] -
-                             self.position[0]) / 80  # weighted 1/100
-        self.velocity[1] += (centerOfMass[1] - self.position[1]) / 80
+                             self.position[0]) / 100  # weighted 1/100
+        self.velocity[1] += (centerOfMass[1] - self.position[1]) / 100
 
     # Keep boids small distance apart
 
