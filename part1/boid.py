@@ -2,12 +2,14 @@ import math
 
 
 class Boid:
-    def __init__(self, id, velocity, position, boundary, size=0):
+    def __init__(self, id, velocity, position, boundary, size,topSpeed=50):
         self.id = id
-        self.size = size
         self.boundary = boundary
         self.position = position  # x, y
         self.velocity = velocity  # x, y
+        self.size = size
+        self.topSpeed = topSpeed
+
 
     def update_position(self, boids, windSpeed):
         self.neighbourhood = self.getNeighbors(boids)
@@ -35,7 +37,7 @@ class Boid:
         self.velocity[0] += windSpeed
 
     def _limitVelocity(self):
-        velocityRange = 150  # max value is velocity range/2,
+        velocityRange = self.topSpeed*2  # max value is velocity range/2,
         self.velocity[0] = self._sigmoid(self.velocity[0], velocityRange)
         self.velocity[1] = self._sigmoid(self.velocity[1], velocityRange)
 
@@ -84,7 +86,7 @@ class Boid:
                              self.velocity[0]) / 8  # weighted 1/8
         self.velocity[1] += (flockVelocity[1] - self.velocity[1]) / 8
 
-    def getNeighbors(self, boids, neighbourhoodSize=40):
+    def getNeighbors(self, boids, neighbourhoodSize=30):
         return [boid for boid in boids if self._distance(boid) < neighbourhoodSize and boid.id != self.id]
 
     def _distance(self, boid):

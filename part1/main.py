@@ -10,48 +10,48 @@ import random
 def main():
     numBoids = 20
     boidSize = 20
+    topSpeed = 50
     boids = []
     gui, canvas, canvasSize = createCanvas()
 
     for i in range(numBoids):
-        boids.append(Boid(i, [random.randint(-20, 40), random.randint(-20, 40)],
-                          [random.randint(30, 90), random.randint(30, 90)], canvasSize, boidSize))
+        boids.append(Boid(i, [random.randint(-10, 10), random.randint(-10, 10)],
+                          [random.randint(30, 300), random.randint(30, 300)], canvasSize, boidSize,topSpeed))
 
     ovals = drawBoids(canvas, boids, canvasSize, boidSize)
-
-    windSpeed = 0
     windArrow = None
+    windSpeed = 0
+
     windArrowOptions = {
         'width': 5,
         'arrowshape': (25, 30, 13)
     }
 
-    iterations = 500
+    iterations = 1000
     try:
         for i in range(iterations):
-            if i > iterations / 3:  # start wind third of the way through simulation
-                windSpeed = sin(i / 20) * 15
+            if i > iterations / 2:  # start wind halfway through simulation
+                windSpeed = sin(i / 30) * 4
                 if windArrow is not None:
                     canvas.delete(windArrow)
-                windArrow = createWindArrow(
-                    canvas, windSpeed, canvasSize / 2, 40, windArrowOptions)
+                canvas.create_text(canvasSize / 2,70,fill="black",font="Times 20 italic bold",text="WIND")
+                windArrow = createWindArrow(canvas, windSpeed, canvasSize / 2, 40, windArrowOptions)
+           
             for boid in boids:
                 boid.update_position(boids, windSpeed)
-                assert(boid.position[0] <
-                       canvasSize and boid.position[1] < canvasSize)
                 moveTo(canvas, ovals[boid.id],
                        boid.position[0], boid.position[1])
-            time.sleep(.15)
+            time.sleep(.05)
             gui.update()
     except KeyboardInterrupt:  # close canvas in case of program quit
         gui.destroy()
-    gui.title("test")
+    gui.title("Boid Simulation")
     gui.destroy()
     gui.mainloop()
 
 
 def createWindArrow(canvas, windSpeed, x, y, options):
-    length = max(abs(windSpeed) * 8, 20)
+    length = max(abs(windSpeed) * 14, 20)
     left = x - length
     right = x + length
     windArrow = None
