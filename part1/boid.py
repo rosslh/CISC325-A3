@@ -9,7 +9,7 @@ class Boid:
         self.velocity = velocity  # x, y
         self.size = size
         self.topSpeed = topSpeed
-        self.neighbourhoodSize = self.boundary/37
+        self.neighbourhoodSize = int(self.boundary/37)
 
     def update_position(self, boids, windSpeed):
         self.neighbourhood = self.getNeighbors(boids, self.neighbourhoodSize)
