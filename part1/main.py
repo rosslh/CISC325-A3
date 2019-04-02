@@ -16,7 +16,7 @@ def main():
 
     for i in range(numBoids):
         boids.append(Boid(i, [random.randint(-40, 40), random.randint(-40, 40)],
-                          [random.randint(0, canvasSize), random.randint(0, canvasSize)], canvasSize, boidSize))
+                          [random.randint(0, canvasSize), random.randint(0, canvasSize)], canvasSize))
 
     ovals = drawBoids(canvas, boids, canvasSize, boidSize)
     windArrow = None
@@ -34,9 +34,11 @@ def main():
                 windSpeed = sin(i / 30) * 4
                 if windArrow is not None:
                     canvas.delete(windArrow)
-                canvas.create_text(canvasSize / 2,70,fill="black",font="Times 20 italic bold",text="WIND")
-                windArrow = createWindArrow(canvas, windSpeed, canvasSize / 2, 40, windArrowOptions)
-           
+                canvas.create_text(
+                    canvasSize / 2, 70, fill="black", font="Times 20 italic bold", text="WIND")
+                windArrow = createWindArrow(
+                    canvas, windSpeed, canvasSize / 2, 40, windArrowOptions)
+
             for boid in boids:
                 boid.update_position(boids, windSpeed)
                 moveTo(canvas, ovals[boid.id],
@@ -51,7 +53,7 @@ def main():
 
 
 def createWindArrow(canvas, windSpeed, x, y, options):
-    length = max(abs(windSpeed) * 14, 20)
+    length = max(abs(windSpeed) * 30, 20)
     left = x - length
     right = x + length
     windArrow = None
