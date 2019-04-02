@@ -6,37 +6,37 @@ from tkinter import *
 import time
 import random
 
-canvasSize = 800
-boidSize = 20
-
 
 def main():
-    numBoids = 15
+    numBoids = 20
+    boidSize = 20
     boids = []
+    gui, canvas, canvasSize = createCanvas()
+
     for i in range(numBoids):
         boids.append(Boid(i, [random.randint(-20, 40), random.randint(-20, 40)],
                           [random.randint(30, 90), random.randint(30, 90)], canvasSize, boidSize))
 
-    gui, canvas, ovals = drawCanvas(canvasSize, boids)
+    ovals = drawBoids(canvas, boids, canvasSize, boidSize)
 
-    windVector = [0, 0]
+    windSpeed = 0
     windArrow = None
     windArrowOptions = {
         'width': 5,
         'arrowshape': (25, 30, 13)
     }
 
-    iterations = 200
+    iterations = 500
     try:
         for i in range(iterations):
-            if i > iterations / 3:  # start wind 1/3 through simulation
-                windVector = [sin(i / 10) * 30,  0]
+            if i > iterations / 3:  # start wind third of the way through simulation
+                windSpeed = sin(i / 20) * 15
                 if windArrow is not None:
                     canvas.delete(windArrow)
                 windArrow = createWindArrow(
-                    canvas, windVector, canvasSize / 2, 40, windArrowOptions)
+                    canvas, windSpeed, canvasSize / 2, 40, windArrowOptions)
             for boid in boids:
-                boid.update_position(boids, windVector)
+                boid.update_position(boids, windSpeed)
                 assert(boid.position[0] <
                        canvasSize and boid.position[1] < canvasSize)
                 moveTo(canvas, ovals[boid.id],
@@ -50,12 +50,12 @@ def main():
     gui.mainloop()
 
 
-def createWindArrow(canvas, windVector, x, y, options):
-    length = max(abs(windVector[0]) * 5, 20)
+def createWindArrow(canvas, windSpeed, x, y, options):
+    length = max(abs(windSpeed) * 8, 20)
     left = x - length
     right = x + length
     windArrow = None
-    if windVector[0] > 0:
+    if windSpeed > 0:
         windArrow = canvas.create_line(
             left, y, right, y, arrow=LAST, **options)
     else:
@@ -75,17 +75,23 @@ def moveTo(canvas, oval, x, y):
     canvas.move(oval, xDiff, yDiff)
 
 
-def drawCanvas(boundary, initialBoids):
+def createCanvas():
     gui = Tk()
-    gui.geometry("{}x{}".format(int(boundary*1.5), int(boundary*1.5)))
-    canvas = Canvas(gui, width=boundary, height=boundary, background="#fafafa")
+    canvasSize = gui.winfo_screenheight() * 0.9
+    gui.geometry("{}x{}".format(int(canvasSize), int(canvasSize)))
+    canvas = Canvas(gui, width=canvasSize,
+                    height=canvasSize, background="#fafafa")
     canvas.pack()
+    return gui, canvas, canvasSize
+
+
+def drawBoids(canvas, boids, boundary, boidSize):
     ovals = {}
-    for i, boid in enumerate(initialBoids):
+    for i, boid in enumerate(boids):
         oval = canvas.create_oval(
             boid.position[0], boid.position[1], boid.position[0] + boidSize, boid.position[1] + boidSize, fill='red')
         ovals[i] = oval
-    return gui, canvas, ovals
+    return ovals
 
 
 main()
