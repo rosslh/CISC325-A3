@@ -77,7 +77,7 @@ def moveTo(canvas, oval, x, y):
 
 def createCanvas():
     gui = Tk()
-    canvasSize = gui.winfo_screenheight() * 0.9
+    canvasSize = int(gui.winfo_screenheight() * 0.9)
     gui.geometry("{}x{}".format(int(canvasSize), int(canvasSize)))
     canvas = Canvas(gui, width=canvasSize,
                     height=canvasSize, background="#fafafa")
