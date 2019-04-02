@@ -30,7 +30,6 @@ class Boid:
     '''
 
     def applyWind(self, windVector):
-        print(windVector)
         self.velocity[0] += windVector[0]
         self.velocity[1] += windVector[1]
 

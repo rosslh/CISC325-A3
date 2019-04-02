@@ -18,14 +18,24 @@ def main():
                           [random.randint(30, 90), random.randint(30, 90)], canvasSize, boidSize))
 
     gui, canvas, ovals = drawCanvas(canvasSize, boids)
+
+    windVector = [0, 0]
+    windArrow = None
+    windArrowOptions = {
+        'width': 5,
+        'arrowshape': (25, 30, 13)
+    }
+
     iterations = 200
     try:
         for i in range(iterations):
-            windVector = [sin(i / 10) * 30,
-                          0] if i > iterations / 2 else [0, 0]
+            if i > iterations / 3:  # start wind 1/3 through simulation
+                windVector = [sin(i / 10) * 30,  0]
+                if windArrow is not None:
+                    canvas.delete(windArrow)
+                windArrow = createWindArrow(
+                    canvas, windVector, canvasSize / 2, 40, windArrowOptions)
             for boid in boids:
-                print(boid.id, boid.position, boid.velocity)
-                bId = boid.id
                 boid.update_position(boids, windVector)
                 assert(boid.position[0] <
                        canvasSize and boid.position[1] < canvasSize)
@@ -38,6 +48,20 @@ def main():
     gui.title("test")
     gui.destroy()
     gui.mainloop()
+
+
+def createWindArrow(canvas, windVector, x, y, options):
+    length = max(abs(windVector[0]) * 5, 20)
+    left = x - length
+    right = x + length
+    windArrow = None
+    if windVector[0] > 0:
+        windArrow = canvas.create_line(
+            left, y, right, y, arrow=LAST, **options)
+    else:
+        windArrow = canvas.create_line(
+            left, y, right, y, arrow=FIRST, **options)
+    return windArrow
 
 
 def moveTo(canvas, oval, x, y):
