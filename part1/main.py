@@ -14,8 +14,8 @@ def main():
     gui, canvas, canvasSize = createCanvas()
 
     for i in range(numBoids):
-        boids.append(Boid(i, [random.randint(-20, 40), random.randint(-20, 40)],
-                          [random.randint(30, 90), random.randint(30, 90)], canvasSize, boidSize))
+        boids.append(Boid(i, [random.randint(-40, 40), random.randint(-40, 40)],
+                          [random.randint(0, canvasSize), random.randint(0, canvasSize)], canvasSize, boidSize))
 
     ovals = drawBoids(canvas, boids, canvasSize, boidSize)
 
@@ -30,7 +30,7 @@ def main():
     try:
         for i in range(iterations):
             if i > iterations / 3:  # start wind third of the way through simulation
-                windSpeed = sin(i / 20) * 15
+                windSpeed = cos(i / 20) * 15
                 if windArrow is not None:
                     canvas.delete(windArrow)
                 windArrow = createWindArrow(
