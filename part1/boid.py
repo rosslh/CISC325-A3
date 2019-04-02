@@ -12,7 +12,7 @@ class Boid:
 
 
     def update_position(self, boids, windSpeed):
-        self.neighbourhood = self.getNeighbors(boids, 40)
+        self.neighbourhood = self.getNeighbors(boids, self.boundary/13)
 
         self.rule1(boids)
         self.rule2()
@@ -59,8 +59,8 @@ class Boid:
         # average y pos of other boids
         centerOfMass[1] /= len(boids) - 1 or 1
         self.velocity[0] += (centerOfMass[0] -
-                             self.position[0]) / 100  # weighted 1/100
-        self.velocity[1] += (centerOfMass[1] - self.position[1]) / 100
+                             self.position[0]) / 80  # weighted 1/100
+        self.velocity[1] += (centerOfMass[1] - self.position[1]) / 80
 
     # Keep boids small distance apart
 
@@ -93,4 +93,4 @@ class Boid:
         x_dist = math.pow(self.position[0]-position[0], 2)
         y_dist = math.pow(self.position[1]-position[1], 2)
         # accounts for boid size
-        return max(math.sqrt(x_dist+y_dist) - self.size, 0)
+        return math.sqrt(x_dist+y_dist)
