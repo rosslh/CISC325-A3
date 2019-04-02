@@ -12,7 +12,7 @@ class Boid:
 
 
     def update_position(self, boids, windSpeed):
-        self.neighbourhood = self.getNeighbors(boids)
+        self.neighbourhood = self.getNeighbors(boids, 40)
 
         self.rule1(boids)
         self.rule2()
@@ -28,13 +28,13 @@ class Boid:
         self.position[0] %= self.boundary
         self.position[1] %= self.boundary
 
-    '''
-        Use the sigmoid function to taper off velocity if it is accelerating out 
-        of control due to the emergent behaviour of the system
-    '''
-
     def applyWind(self, windSpeed):
         self.velocity[0] += windSpeed
+
+    '''
+    Use the sigmoid function to taper off velocity if it is accelerating out 
+    of control due to the emergent behaviour of the system
+    '''
 
     def _limitVelocity(self):
         velocityRange = self.topSpeed*2  # max value is velocity range/2,
@@ -49,7 +49,7 @@ class Boid:
 
     # moves boid to middle of center of mass
     def rule1(self, boids):
-        # a vector representing the center of mass for the boid's neighbourhood
+        # a vector representing the center of mass for all boids in flock
         centerOfMass = self.position[:]
         for boid in boids:
             centerOfMass[0] = centerOfMass[0] + boid.position[0]
@@ -68,7 +68,6 @@ class Boid:
         vector = [0, 0]
         for boid in self.neighbourhood:
             vector[0] -= self.position[0]-boid.position[0]
-            # subtract y coordinates
             vector[1] -= self.position[1]-boid.position[1]
         self.velocity[0] += vector[0]
         self.velocity[1] += vector[1]

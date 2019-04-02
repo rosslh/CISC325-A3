@@ -15,8 +15,8 @@ def main():
     gui, canvas, canvasSize = createCanvas()
 
     for i in range(numBoids):
-        boids.append(Boid(i, [random.randint(-10, 10), random.randint(-10, 10)],
-                          [random.randint(30, 300), random.randint(30, 300)], canvasSize, boidSize,topSpeed))
+        boids.append(Boid(i, [random.randint(-40, 40), random.randint(-40, 40)],
+                          [random.randint(0, canvasSize), random.randint(0, canvasSize)], canvasSize, boidSize))
 
     ovals = drawBoids(canvas, boids, canvasSize, boidSize)
     windArrow = None
