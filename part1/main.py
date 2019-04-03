@@ -20,7 +20,7 @@ def main():
 
     ovals = drawBoids(canvas, boids, canvasSize, boidSize)
     windArrow = None
-    windSpeed = 0
+    windSpeed = [0,0]
 
     windArrowOptions = {
         'width': 5,
@@ -30,20 +30,20 @@ def main():
     try:
         for i in range(iterations):
             if i > iterations / 2:  # start wind halfway through simulation
-                windSpeed = sin(i / 30) * 4
+                windSpeed = [sin(i / 30) * 4,sin(i / 40) * 2]
                 if windArrow is not None:
                     canvas.delete(windArrow)
                 canvas.create_text(
                     canvasSize / 2, 70, fill="black", font="Times 20 italic bold", text="WIND")
                 windArrow = createWindArrow(
-                    canvas, windSpeed, canvasSize / 2, 40, windArrowOptions)
+                    canvas, windSpeed[0], canvasSize / 2, 40, windArrowOptions)
 
             for boid in boids:
                 boid.update_position(boids, windSpeed)
                 # canvas.move(ovals[boid.id],boid.velocity[0],boid.velocity[1])
                 moveTo(canvas, ovals[boid.id],
                        boid.position[0], boid.position[1])
-            time.sleep(.1)
+            time.sleep(.05)
             gui.update()
     except KeyboardInterrupt:  # close canvas in case of program quit
         gui.destroy()
