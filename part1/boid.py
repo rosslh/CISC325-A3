@@ -42,9 +42,9 @@ class Boid:
 
     def _limitVelocity(self):
         vx, vy = self.velocity
-        n = math.sqrt(vx**2 + vy**2)
-        f = min(n, self.topSpeed) / n
-        self.velocity = [f * vx, f * vy]
+        magnitude = math.sqrt(vx**2 + vy**2)
+        multiplier = min(magnitude, self.topSpeed) / magnitude
+        self.velocity = [multiplier * vx, multiplier * vy]
 
     # moves boid to middle of center of mass
 
