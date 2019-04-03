@@ -9,12 +9,12 @@ class Boid:
         self.velocity = velocity  # x, y
         self.topSpeed = 10
         # smaller neighborhood size results in more cohesive flock
-        self.neighbourhoodSize = 80
-        self.rule2Boundary = 20
+        self.neighbourhoodSize = 40
+        self.rule2Boundary = 10
 
     def update_position(self, boids, windSpeed):
         self.neighbourhood = self.getNeighbors(boids)
-
+       
         self.rule1()
         self.rule2()
         self.rule3()
@@ -98,11 +98,12 @@ class Boid:
         for boid in self.neighbourhood:
             flockVelocity[0] += boid.velocity[0]
             flockVelocity[1] += boid.velocity[1]
-        flockVelocity[0] /= len(self.neighbourhood) - 1 or 1
-        flockVelocity[1] /= len(self.neighbourhood) - 1 or 1
-        self.velocity[0] += (flockVelocity[0] -
-                             self.velocity[0]) / 8  # weighted 1/8
-        self.velocity[1] += (flockVelocity[1] - self.velocity[1]) / 8
+        flockVelocity[0] /= (len(self.neighbourhood) - 1) or 1
+        flockVelocity[1] /= (len(self.neighbourhood) - 1) or 1
+        # print(len(self.neighbourhood),flockVelocity[0],flockVelocity[1],self.velocity[0],self.velocity[1])
+
+        self.velocity[0] += (flockVelocity[0] + self.velocity[0]) / 8  # weighted 1/8
+        self.velocity[1] += (flockVelocity[1] + self.velocity[1]) / 8
 
     def getNeighbors(self, boids):
         return [boid for boid in boids if self._distance(boid) < self.neighbourhoodSize and boid.id != self.id]

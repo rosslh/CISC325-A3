@@ -8,17 +8,15 @@ import random
 
 
 def main():
-    numBoids = 20
+    numBoids = 30
     boids = []
     gui, canvas, canvasSize = createCanvas()
-    boidSize = canvasSize // 100
-
+    boidSize = 5
   
     for i in range(numBoids):
-        accx, accy = random.randint(-4,4), random.randint(-4,4)
+        accx, accy = random.randint(-1,10), random.randint(-10,10)
         # accx, accy = random.randint(-40, 40), random.randint(-40, 40)
-        boids.append(Boid(i, [accx, accy],
-                          [random.randint(0, canvasSize), random.randint(0, canvasSize)], canvasSize))
+        boids.append(Boid(i, [accx, accy],[random.randint(0, canvasSize), random.randint(0, canvasSize)], canvasSize))
 
     ovals = drawBoids(canvas, boids, canvasSize, boidSize)
     windArrow = None
@@ -28,7 +26,6 @@ def main():
         'width': 5,
         'arrowshape': (25, 30, 13)
     }
-
     iterations = 1000
     try:
         for i in range(iterations):
@@ -43,6 +40,7 @@ def main():
 
             for boid in boids:
                 boid.update_position(boids, windSpeed)
+                # canvas.move(ovals[boid.id],boid.velocity[0],boid.velocity[1])
                 moveTo(canvas, ovals[boid.id],
                        boid.position[0], boid.position[1])
             time.sleep(.05)
@@ -91,10 +89,10 @@ def createCanvas():
 
 def drawBoids(canvas, boids, boundary, boidSize):
     ovals = {}
-    colors = ["red", "orange", "yellow", "green", "blue", "purple", "magenta"]
+    # colors = ["red", "orange", "yellow", "green", "blue", "purple", "magenta"]
     for i, boid in enumerate(boids):
         oval = canvas.create_oval(
-            boid.position[0], boid.position[1], boid.position[0] + boidSize, boid.position[1] + boidSize, fill=colors[i % len(colors)])
+            boid.position[0], boid.position[1], boid.position[0] + boidSize, boid.position[1] + boidSize, fill="red")
         ovals[boid.id] = oval
     return ovals
 
