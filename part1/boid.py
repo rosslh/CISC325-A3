@@ -2,63 +2,98 @@ import math
 
 
 class Boid:
-    def __init__(self, id, velocity, position):
+    def __init__(self, id, velocity, position, boundary):
         self.id = id
+        self.boundary = boundary
         self.position = position  # x, y
         self.velocity = velocity  # x, y
+        self.topSpeed = 40
 
-    def update_position(self, boids):
-        self.rule1(boids)
-        self.rule2(boids)
-        self.rule3(boids)
+        # i.e. flock size
+        self.neighbourhoodSize = boundary // 6
+
+        # i.e. how close boids can get
+        self.rule2Boundary = boundary // 15
+
+    def update_position(self, boids, windSpeed):
+        self.neighbourhood = self.getNeighbors(boids)
+
+        self.rule1()
+        self.rule2()
+        self.rule3()
+
+        self.applyWind(windSpeed)
+
+        self._limitVelocity()
+
         self.position[0] += self.velocity[0]
         self.position[1] += self.velocity[1]
 
+        self.position[0] %= self.boundary
+        self.position[1] %= self.boundary
+
+    def applyWind(self, windSpeed):
+        self.velocity[0] += windSpeed
+
+    '''
+    Use the sigmoid function to taper off velocity if it is accelerating out
+    of control due to the emergent behaviour of the system
+    '''
+
+    def _limitVelocity(self):
+        vx, vy = self.velocity
+        magnitude = math.sqrt(vx**2 + vy**2)
+        multiplier = min(magnitude, self.topSpeed) / magnitude
+        self.velocity = [multiplier * vx, multiplier * vy]
+
     # moves boid to middle of center of mass
-    def rule1(self, boids):
-        vector = [0, 0]
-        for boid in boids:
-            if boid.id != self.id:
-                vector[0] = vector[0] + boid.position[0]
-                vector[1] = vector[1] + boid.position[1]
-        vector[0] /= len(boids)  # average x pos of other boids
-        vector[1] /= len(boids)  # average y pos of other boids
-        self.velocity[0] += (vector[0] - self.position[0]) / 100
-        self.velocity[1] += (vector[1] - self.position[1]) / 100
+
+    def rule1(self):
+        # a vector representing the center of mass for all boids in flock
+        centerOfMass = self.position[:]
+        for boid in self.neighbourhood:
+            centerOfMass[0] += boid.position[0]
+            centerOfMass[1] += boid.position[1]
+
+        # average x pos of all boids
+        centerOfMass[0] /= len(self.neighbourhood) + 1
+
+        # average y pos of all boids
+        centerOfMass[1] /= len(self.neighbourhood) + 1
+
+        # rule 1 weighted 1/100
+        self.velocity[0] += (centerOfMass[0] - self.position[0]) / 100
+        self.velocity[1] += (centerOfMass[1] - self.position[1]) / 100
 
     # Keep boids small distance apart
 
-    def rule2(self, boids):
+    def rule2(self):
         vector = [0, 0]
-        for boid in boids:
-            if boid.id != self.id:
-
-                if self._inSameNeighborhood(boid):
-                    # subtract x coordinates
-                    vector[0] -= self.position[0]-boid.position[0]
-                    # subtract y coordinates
-                    vector[1] -= self.position[1]-boid.position[1]
+        for boid in self.neighbourhood:
+            if self._distance(boid) < self.rule2Boundary:
+                vector[0] -= boid.position[0]-self.position[0]
+                vector[1] -= boid.position[1]-self.position[1]
         self.velocity[0] += vector[0]
         self.velocity[1] += vector[1]
+
     # Align boid velocities
 
-    def rule3(self, boids):
-        vector = [0, 0]
-        for boid in boids:
-            if self.id != boid.id:
-                if self._inSameNeighborhood(boid):
-                    vector[0] = vector[0] + boid.velocity[0]
-                    vector[1] = vector[1] + boid.velocity[1]
-        vector[0] /= len(boids)
-        vector[1] /= len(boids)
-        self.velocity[0] += (vector[0] - self.position[0]) / 8
-        self.velocity[1] += (vector[1] - self.position[1]) / 8
+    def rule3(self):
+        flockVelocity = self.velocity[:]
+        for boid in self.neighbourhood:
+            flockVelocity[0] += boid.velocity[0]
+            flockVelocity[1] += boid.velocity[1]
+        flockVelocity[0] /= len(self.neighbourhood) - 1 or 1
+        flockVelocity[1] /= len(self.neighbourhood) - 1 or 1
+        self.velocity[0] += (flockVelocity[0] -
+                             self.velocity[0]) / 8  # weighted 1/8
+        self.velocity[1] += (flockVelocity[1] - self.velocity[1]) / 8
 
-    def _inSameNeighborhood(self, boid):
-        return self._distance(boid) < 100
+    def getNeighbors(self, boids):
+        return [boid for boid in boids if self._distance(boid) < self.neighbourhoodSize and boid.id != self.id]
 
     def _distance(self, boid):
-        position = boid.position
-        x_dist = math.pow(self.position[0]-position[0], 2)
-        y_dist = math.pow(self.position[1]-position[1], 2)
+        position = boid.position[:]
+        x_dist = (self.position[0]-position[0])**2
+        y_dist = (self.position[1]-position[1])**2
         return math.sqrt(x_dist+y_dist)

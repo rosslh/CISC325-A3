@@ -8,39 +8,94 @@ import random
 
 
 def main():
-    numBoids = 10
+    numBoids = 20
     boids = []
-    for _ in range(numBoids):
-        boids.append(Boid(1, [random.randint(0, 50), random.randint(0, 50)], [
-                     random.randint(0, 50), random.randint(0, 50)]))
+    gui, canvas, canvasSize = createCanvas()
+    boidSize = canvasSize // 100
 
-    iterations = 10
-    for i in range(iterations):
-        for boid in boids:
-            beforePos = boid.position[:]  # makes a shallow copy of the array
-            bId = boid.id
+    for i in range(numBoids):
+        accx, accy = random.randint(-4, 4), random.randint(-4, 4)
+        # accx, accy = random.randint(-40, 40), random.randint(-40, 40)
+        boids.append(Boid(i, [accx, accy],
+                          [random.randint(0, canvasSize), random.randint(0, canvasSize)], canvasSize))
 
-            boid.update_position(boids)
-            # print("Boid {} Before: {} After: {}".format(
-            # boid.id, beforePos, boid.position))
+    ovals = drawBoids(canvas, boids, canvasSize, boidSize)
+    windArrow = None
+    windSpeed = 0
 
-        display(boids)
+    windArrowOptions = {
+        'width': 5,
+        'arrowshape': (25, 30, 13)
+    }
 
+    iterations = 1000
+    try:
+        for i in range(iterations):
+            if i > iterations / 2:  # start wind halfway through simulation
+                windSpeed = sin(i / 30) * 4
+                if windArrow is not None:
+                    canvas.delete(windArrow)
+                canvas.create_text(
+                    canvasSize / 2, 70, fill="black", font="Times 20 italic bold", text="WIND")
+                windArrow = createWindArrow(
+                    canvas, windSpeed, canvasSize / 2, 40, windArrowOptions)
 
-def display(boids):
-    gui = Tk()
-    gui.geometry("400x400")
-    gui.title("Boids")
-    canvas = Canvas(gui, width=300, height=300, bg='white')
-    canvas.pack()
-    boidShapes = []
-    boidSize = 20
-    for boid in boids:
-        boidShapes.append(canvas.create_oval(boid.position[0], boid.position[1],
-                                             boid.position[0] + boidSize, boid.position[1] + boidSize, fill='red'))
-
-    gui.after(1000, gui.destroy)
+            for boid in boids:
+                boid.update_position(boids, windSpeed)
+                moveTo(canvas, ovals[boid.id],
+                       boid.position[0], boid.position[1])
+            time.sleep(.1)
+            gui.update()
+    except KeyboardInterrupt:  # close canvas in case of program quit
+        gui.destroy()
+    gui.title("Boid Simulation")
+    gui.destroy()
     gui.mainloop()
+
+
+def createWindArrow(canvas, windSpeed, x, y, options):
+    length = max(abs(windSpeed) * 30, 20)
+    left = x - length
+    right = x + length
+    windArrow = None
+    if windSpeed > 0:
+        windArrow = canvas.create_line(
+            left, y, right, y, arrow=LAST, **options)
+    else:
+        windArrow = canvas.create_line(
+            left, y, right, y, arrow=FIRST, **options)
+    return windArrow
+
+
+def moveTo(canvas, oval, x, y):
+    currentCoords = canvas.coords(oval)
+    currentX = (currentCoords[0] + currentCoords[2]) // 2
+    currentY = (currentCoords[1] + currentCoords[3]) // 2
+
+    xDiff = x - currentX
+    yDiff = y - currentY
+
+    canvas.move(oval, xDiff, yDiff)
+
+
+def createCanvas():
+    gui = Tk()
+    canvasSize = int(gui.winfo_screenheight() * 0.9)
+    gui.geometry("{}x{}".format(canvasSize, canvasSize))
+    canvas = Canvas(gui, width=canvasSize,
+                    height=canvasSize, background="#fafafa")
+    canvas.pack()
+    return gui, canvas, canvasSize
+
+
+def drawBoids(canvas, boids, boundary, boidSize):
+    ovals = {}
+    colors = ["red", "orange", "yellow", "green", "blue", "purple", "magenta"]
+    for i, boid in enumerate(boids):
+        oval = canvas.create_oval(
+            boid.position[0], boid.position[1], boid.position[0] + boidSize, boid.position[1] + boidSize, fill=colors[i % len(colors)])
+        ovals[boid.id] = oval
+    return ovals
 
 
 main()
