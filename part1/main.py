@@ -9,13 +9,15 @@ import random
 
 def main():
     numBoids = 20
-    boidSize = 20
-    topSpeed = 50
     boids = []
     gui, canvas, canvasSize = createCanvas()
+    boidSize = canvasSize // 100
 
+  
     for i in range(numBoids):
-        boids.append(Boid(i, [random.randint(-40, 40), random.randint(-40, 40)],
+        accx, accy = random.randint(-4,4), random.randint(-4,4)
+        # accx, accy = random.randint(-40, 40), random.randint(-40, 40)
+        boids.append(Boid(i, [accx, accy],
                           [random.randint(0, canvasSize), random.randint(0, canvasSize)], canvasSize))
 
     ovals = drawBoids(canvas, boids, canvasSize, boidSize)
@@ -80,7 +82,7 @@ def moveTo(canvas, oval, x, y):
 def createCanvas():
     gui = Tk()
     canvasSize = int(gui.winfo_screenheight() * 0.9)
-    gui.geometry("{}x{}".format(int(canvasSize), int(canvasSize)))
+    gui.geometry("{}x{}".format(canvasSize, canvasSize))
     canvas = Canvas(gui, width=canvasSize,
                     height=canvasSize, background="#fafafa")
     canvas.pack()
@@ -89,10 +91,11 @@ def createCanvas():
 
 def drawBoids(canvas, boids, boundary, boidSize):
     ovals = {}
+    colors = ["red", "orange", "yellow", "green", "blue", "purple", "magenta"]
     for i, boid in enumerate(boids):
         oval = canvas.create_oval(
-            boid.position[0], boid.position[1], boid.position[0] + boidSize, boid.position[1] + boidSize, fill='red')
-        ovals[i] = oval
+            boid.position[0], boid.position[1], boid.position[0] + boidSize, boid.position[1] + boidSize, fill=colors[i % len(colors)])
+        ovals[boid.id] = oval
     return ovals
 
 
