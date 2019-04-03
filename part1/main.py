@@ -11,10 +11,10 @@ def main():
     numBoids = 30
     boids = []
     gui, canvas, canvasSize = createCanvas()
-    boidSize = 5
-  
+    boidSize = canvasSize // 100
+
     for i in range(numBoids):
-        accx, accy = random.randint(-1,10), random.randint(-10,10)
+        accx, accy = random.randint(-4, 4), random.randint(-4, 4)
         # accx, accy = random.randint(-40, 40), random.randint(-40, 40)
         boids.append(Boid(i, [accx, accy],[random.randint(0, canvasSize), random.randint(0, canvasSize)], canvasSize))
 
@@ -43,7 +43,7 @@ def main():
                 # canvas.move(ovals[boid.id],boid.velocity[0],boid.velocity[1])
                 moveTo(canvas, ovals[boid.id],
                        boid.position[0], boid.position[1])
-            time.sleep(.05)
+            time.sleep(.1)
             gui.update()
     except KeyboardInterrupt:  # close canvas in case of program quit
         gui.destroy()
