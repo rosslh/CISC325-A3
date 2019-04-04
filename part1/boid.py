@@ -7,14 +7,17 @@ class Boid:
         self.boundary = boundary
         self.position = position  # x, y
         self.velocity = velocity  # x, y
-        self.topSpeed = 10
-        # smaller neighborhood size results in more cohesive flock
-        self.neighbourhoodSize = 40
-        self.rule2Boundary = 15
+        self.topSpeed = 15
+
+        # i.e. flock size
+        self.neighbourhoodRadius = 50
+
+        # i.e. how close boids can get
+        self.rule2Radius = 15
 
     def update_position(self, boids, windSpeed):
         self.neighbourhood = self.getNeighbors(boids)
-       
+
         self.rule1()
         self.rule2()
         self.rule3()
@@ -30,37 +33,21 @@ class Boid:
         self.position[1] %= self.boundary
 
     def applyWind(self, windSpeed):
-        self.velocity[1] += windSpeed[1]
-        self.velocity[0] += windSpeed[0]
+        self.velocity[0] += windSpeed
 
     '''
-    Use the sigmoid function to taper off velocity if it is accelerating out 
+    Use the sigmoid function to taper off velocity if it is accelerating out
     of control due to the emergent behaviour of the system
     '''
 
     def _limitVelocity(self):
-        magnitude = self._mag(self.velocity)
+        vx, vy = self.velocity
+        magnitude = math.sqrt(vx**2 + vy**2)
+        multiplier = 1
         if magnitude > self.topSpeed:
-            self.velocity[0] = (self.velocity[0]/magnitude) * self.topSpeed
-            self.velocity[1] = (self.velocity[1]/magnitude) * self.topSpeed
-
-        # velocityRange = self.topSpeed*2  # max value is velocity range/2,
-        # self.velocity[0] = self._sigmoid(self.velocity[0], velocityRange)
-        # self.velocity[1] = self._sigmoid(self.velocity[1], velocityRange)
-
-    def _mag(self, x):
-        return math.sqrt(sum(i**2 for i in x))
-
-    # def _limitVelocity(self):
-    #     velocityRange = self.topSpeed*2  # max value is velocity range/2,
-    #     self.velocity[0] = self._sigmoid(self.velocity[0], velocityRange)
-    #     self.velocity[1] = self._sigmoid(self.velocity[1], velocityRange)
-
-    # def _sigmoid(self, x, velocityRange):
-    #     div5 = velocityRange/5
-    #     denominator = 1 + math.exp(-(1/div5) * x)
-    #     fraction = (1/denominator)*velocityRange
-    #     return fraction-(velocityRange/2)
+            print("limiting speed")
+            multiplier = self.topSpeed / magnitude
+        self.velocity = [multiplier * vx, multiplier * vy]
 
     # moves boid to middle of center of mass
 
@@ -86,7 +73,7 @@ class Boid:
     def rule2(self):
         vector = [0, 0]
         for boid in self.neighbourhood:
-            if self._distance(boid) < self.rule2Boundary:
+            if self._distance(boid) < self.rule2Radius:
                 vector[0] -= boid.position[0]-self.position[0]
                 vector[1] -= boid.position[1]-self.position[1]
         self.velocity[0] += vector[0]/2
@@ -99,15 +86,15 @@ class Boid:
         for boid in self.neighbourhood:
             flockVelocity[0] += boid.velocity[0]
             flockVelocity[1] += boid.velocity[1]
-        flockVelocity[0] /= (len(self.neighbourhood) - 1) or 1
-        flockVelocity[1] /= (len(self.neighbourhood) - 1) or 1
-        # print(len(self.neighbourhood),flockVelocity[0],flockVelocity[1],self.velocity[0],self.velocity[1])
+        flockVelocity[0] /= len(self.neighbourhood) + 1
+        flockVelocity[1] /= len(self.neighbourhood) + 1
 
-        self.velocity[0] += (flockVelocity[0] + self.velocity[0]) / 8  # weighted 1/8
-        self.velocity[1] += (flockVelocity[1] + self.velocity[1]) / 8
+        self.velocity[0] += (flockVelocity[0] -
+                             self.velocity[0]) / 8  # weighted 1/8
+        self.velocity[1] += (flockVelocity[1] - self.velocity[1]) / 8
 
     def getNeighbors(self, boids):
-        return [boid for boid in boids if self._distance(boid) < self.neighbourhoodSize and boid.id != self.id]
+        return [boid for boid in boids if self._distance(boid) < self.neighbourhoodRadius and boid.id != self.id]
 
     def _distance(self, boid):
         position = boid.position[:]
