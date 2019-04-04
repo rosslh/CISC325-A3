@@ -45,7 +45,6 @@ class Boid:
         magnitude = math.sqrt(vx**2 + vy**2)
         multiplier = 1
         if magnitude > self.topSpeed:
-            print("limiting speed")
             multiplier = self.topSpeed / magnitude
         self.velocity = [multiplier * vx, multiplier * vy]
 
